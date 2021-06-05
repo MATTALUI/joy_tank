@@ -1,22 +1,37 @@
-from flask import Flask
-from flask import Flask
-from flask_socketio import SocketIO
+from enum import Enum
 
-app = Flask(__name__)
-sio = SocketIO(app)
+class Tank:
+  class Pins(Enum):
+    WHEEL_RIGHT=None
+    WHEEL_LEFT=None
+    LED_TURRET=None
+    LED_DRIVE=None
+    LED_HEAD=None
 
-# Handle Input and Set State
-@sio.on('move')
-def handle_movement(sid, data):
-  pass
+  def __init__(self):
+    pass
 
-@sio.on('press')
-def handle_press(sid, data):
-  pass
+  def handle_movement(self, data):
+    print('======== move: ', data)
 
-@sio.on('release')
-def handle_release(sid, data):
-  pass
+  def handle_press(self, button):
+    print('======== handle_press: ', button)
+    handler = {
+      "0": lambda: self._fire_turrets(),
+    }.get(str(button)) or (lambda: None)
+    handler()
 
-# Run application
-sio.run(app)
+  def handle_release(self, button):
+    print('======== handle_release: ', button)
+
+  def _handle_turning(self):
+    pass
+
+  def _handle_acceleration(self):
+    pass
+
+  def _handle_turret_rotation(self):
+    pass
+
+  def _fire_turrets(self):
+    print("fire!")

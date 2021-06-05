@@ -11,7 +11,7 @@ axes = joystick.get_numaxes()
 
 # Initialize socket connection to Tank
 sio = socketio.Client()
-# sio.connect('http://localhost:5000')
+sio.connect('http://0.0.0.0:6969')
 
 axis_name_map = {
   "0": "X",
@@ -20,27 +20,12 @@ axis_name_map = {
   "3": "THROTTLE",
 }
 
-# axis_dir_map = {
-#   "0": "RIGHT",
-#   "1": "BACK",
-#   "2": "ROTATION CW",
-#   "3": "THROTTLE DOWN",
-# }
-
-# neg_axis_dir_map = {
-#   "0": "LEFT",
-#   "1": "FORWARD",
-#   "2": "ROTATION CCW",
-#   "3": "THROTTLE UP",
-# }
-
 state = {
   "0": f"{axis_name_map['0']} OFF +",
   "1": f"{axis_name_map['1']} OFF +",
   "2": f"{axis_name_map['2']} OFF +",
   "3": f"{axis_name_map['3']} OFF +",
 }
-
 
 def determine_power(value):
   normalized_value = abs(value * 100)
@@ -53,20 +38,14 @@ def determine_power(value):
 def determine_sign(axis, value):
   axis = str(axis)
   offset = 33
+  # Making sure that the acis has passed an offset threshold helps to reduce state change
+  # noise that occurs when changing from negative or positive numbers with low ABS value.
   if abs(value * 100) <= offset:
     return state[axis].split(' ')[2]
   if value > 0:
     return "+"
   else:
     return "-"
-
-# def map_axis_motion(axis, value):
-#   map = axis_dir_map
-#   if value < 0:
-#     map = neg_axis_dir_map
-#   direction = map[axis]
-#   power = determine_power(value)
-#   print(f"{direction}: {power}")
 
 def compare_axis_motion(axis, value):
   axis = str(axis)
@@ -77,13 +56,18 @@ def compare_axis_motion(axis, value):
   old_state = state[axis]
   if new_state != old_state:
     state[axis] = new_state
-    print(new_state)
+    sio.emit('move', {
+      "power": power,
+      "axis": axis_name,
+      "direction": sign,
+      "value": value,
+    })
 
 while True:
   for event in pygame.event.get():
     if event.type == pygame.JOYBUTTONDOWN:
-      print(f"Joystick button pressed. {event.button}")
+      sio.emit('press', event.button)
     elif event.type == pygame.JOYBUTTONUP:
-      print(f"Joystick button released. {event.button}")
+      sio.emit('release', event.button)
     elif event.type == pygame.JOYAXISMOTION:
       compare_axis_motion(event.axis, event.value)
