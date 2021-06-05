@@ -1,5 +1,6 @@
 import pygame
 import socketio
+import math
 
 # Initialize pygame for joystick readings
 pygame.init()
@@ -47,6 +48,9 @@ def determine_sign(axis, value):
   else:
     return "-"
 
+def convert_throttle_value(value):
+  return math.floor((value*-50)+50)
+
 def compare_axis_motion(axis, value):
   axis = str(axis)
   axis_name = axis_name_map[axis]
@@ -54,7 +58,10 @@ def compare_axis_motion(axis, value):
   sign = determine_sign(axis, value)
   new_state = f"{axis_name} {power} {sign}"
   old_state = state[axis]
-  if new_state != old_state:
+  is_throttle = axis_name == "THROTTLE"
+  if is_throttle:
+    value = convert_throttle_value(value)
+  if is_throttle or new_state != old_state:
     state[axis] = new_state
     sio.emit('move', {
       "power": power,
