@@ -1,21 +1,21 @@
-from enum import Enum
+from enum import IntEnum
 from threading import Thread
 from time import sleep
-# from gpiozero import Led, Servo
+from gpiozero import LED, Servo
 
 class Tank:
-  class Pins(Enum):
-    WHEEL_RIGHT=None
-    WHEEL_LEFT=None
-    LED_TURRET=None
-    LED_DRIVE=None
-    LED_HEAD=None
+  class Pins(IntEnum):
+    #WHEEL_RIGHT=None
+    #WHEEL_LEFT=None
+    LED_TURRET=17
+    #LED_DRIVE=None
+    #LED_HEAD=None
 
   def __init__(self):
     self.is_firing = False
-    # self.turret_led = Led(self.Pins.LED_TURRET)
-    # self.head_led = Led(self.Pins.LED_HEAD)
-    # self.drive_led = Led(self.Pins.LED_DRIVE)
+    self.turret_led = LED(self.Pins.LED_TURRET)
+    # self.head_led = LED(self.Pins.LED_HEAD)
+    # self.drive_led = LED(self.Pins.LED_DRIVE)
     # self.left_wheel = Servo(self.Pins.WHEEL_LEFT)
     # self.left_right = Servo(self.Pins.WHEEL_RIGHT)
     # self.update_thread = self._initialize_update_thread()
@@ -78,9 +78,11 @@ class Tank:
   def _fire_turrets(self):
     print("fire!")
     self.is_firing = True
+    self.turret_led.blink(on_time=1/15, off_time=1/12)
 
   def _ceasefire_turrets(self):
     self.is_firing = False
+    self.turret_led.off()
 
   def _initialize_update_thread(self):
     def set_pins_from_state():
