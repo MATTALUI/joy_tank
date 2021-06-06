@@ -39,7 +39,7 @@ def determine_power(value):
 def determine_sign(axis, value):
   axis = str(axis)
   offset = 33
-  # Making sure that the acis has passed an offset threshold helps to reduce state change
+  # Making sure that the axis has passed an offset threshold helps to reduce state change
   # noise that occurs when changing from negative or positive numbers with low ABS value.
   if abs(value * 100) <= offset:
     return state[axis].split(' ')[2]

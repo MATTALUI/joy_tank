@@ -1,6 +1,7 @@
 from enum import Enum
 from threading import Thread
 from time import sleep
+# from gpiozero import Led, Servo
 
 class Tank:
   class Pins(Enum):
@@ -12,6 +13,11 @@ class Tank:
 
   def __init__(self):
     self.is_firing = False
+    # self.turret_led = Led(self.Pins.LED_TURRET)
+    # self.head_led = Led(self.Pins.LED_HEAD)
+    # self.drive_led = Led(self.Pins.LED_DRIVE)
+    # self.left_wheel = Servo(self.Pins.WHEEL_LEFT)
+    # self.left_right = Servo(self.Pins.WHEEL_RIGHT)
     # self.update_thread = self._initialize_update_thread()
 
   def handle_movement(self, data):
@@ -40,15 +46,34 @@ class Tank:
 
   def _handle_turning(self, data):
     print('======== turn: ', data)
+    if data['direction'] == '+':
+      # TODO: Turn right
+      pass
+    else:
+      # TODO: Turn left
+      pass
 
   def _handle_acceleration(self, data):
     print('======== accelerate: ', data)
+    if data['direction'] == '+':
+      # TODO: Move backward
+      pass
+    else:
+      # TODO: Move forward
+      pass
 
   def _handle_turret_rotation(self, data):
     print('======== rotate: ', data)
+    if data['direction'] == '+':
+      # TODO: Rotate CW
+      pass
+    else:
+      # TODO: Rotate CCW
+      pass
 
   def _handle_throttle(self, data):
     print('======== throttle: ', data)
+    # TODO: Investigate wether or not we can even do something interesting with the throttle
 
   def _fire_turrets(self):
     print("fire!")
