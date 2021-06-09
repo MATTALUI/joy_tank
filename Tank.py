@@ -5,8 +5,8 @@ from gpiozero import LED, Servo
 
 class Tank:
   class Pins(IntEnum):
-    #WHEEL_RIGHT=None
-    #WHEEL_LEFT=None
+    SERVO_RIGHT=23
+    SERVO_LEFT=22
     SERVO_TURRET=27
     LED_TURRET=17
     #LED_DRIVE=None
@@ -20,9 +20,11 @@ class Tank:
     self.turret_mount.value = 0.0
     # self.head_led = LED(self.Pins.LED_HEAD)
     # self.drive_led = LED(self.Pins.LED_DRIVE)
-    # self.left_wheel = Servo(self.Pins.WHEEL_LEFT)
-    # self.left_right = Servo(self.Pins.WHEEL_RIGHT)
+    self.left_wheel = Servo(self.Pins.SERVO_LEFT, min_pulse_width=0.75/1000, max_pulse_width=2.25/1000, frame_width=20/1000)
+    self.right_wheel = Servo(self.Pins.SERVO_RIGHT, min_pulse_width=0.75/1000, max_pulse_width=2.25/1000, frame_width=20/1000)
     self.update_thread = self._initialize_update_thread()
+    self.left_wheel.value = None
+    self.right_wheel.value = None
 
   def handle_movement(self, data):
     axis = data['axis']
@@ -50,21 +52,43 @@ class Tank:
 
   def _handle_turning(self, data):
     print('======== turn: ', data)
+    speed = None
+    if data['power'] == 'OFF':
+        self.left_wheel.value = speed
+        self.right_wheel.value = speed
+        return
+    if data['power'] == 'LOW':
+        speed = 1/75
+    elif data['power'] == 'HIGH':
+        speed = 1
+
     if data['direction'] == '+':
-      # TODO: Turn right
-      pass
+        self.right_wheel.value = None
+        self.left_wheel.value = speed
     else:
-      # TODO: Turn left
-      pass
+        self.right_wheel.value = -speed
+        self.left_wheel.value = None
 
   def _handle_acceleration(self, data):
-    print('======== accelerate: ', data)
+    speed = None
+    if data['power'] == 'OFF':
+        self.left_wheel.value = speed
+        self.right_wheel.value = speed
+        return
+    elif data['power'] == 'LOW':
+        speed = 1/75
+    elif data['power'] == 'HIGH':
+        speed = 1
+
     if data['direction'] == '+':
-      # TODO: Move backward
-      pass
+        # Ideally, we could use the speed var here, but the motors are slightly
+        # different and the right motor doesn't seem to handle the backwards
+        # power levels correctly.
+        self.left_wheel.value = -1
+        self.right_wheel.value = 1
     else:
-      # TODO: Move forward
-      pass
+        self.left_wheel.value = speed
+        self.right_wheel.value = -speed
 
   def _handle_turret_rotation(self, data):
     power = data['power']
