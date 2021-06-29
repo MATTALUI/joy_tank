@@ -5,8 +5,8 @@ from gpiozero import LED, Servo
 
 class Tank:
   class Pins(IntEnum):
-    SERVO_RIGHT=23
-    SERVO_LEFT=22
+    SERVO_RIGHT=22
+    SERVO_LEFT=23
     SERVO_TURRET=27
     LED_TURRET=17
     #LED_DRIVE=None
@@ -63,11 +63,11 @@ class Tank:
         speed = 1
 
     if data['direction'] == '+':
-        self.right_wheel.value = None
-        self.left_wheel.value = speed
-    else:
         self.right_wheel.value = -speed
         self.left_wheel.value = None
+    else:
+        self.right_wheel.value = None
+        self.left_wheel.value = speed
 
   def _handle_acceleration(self, data):
     speed = None
